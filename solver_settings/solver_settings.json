@@ -1,0 +1,78 @@
+{
+  "catchment_thresholds_evaluated": [
+    {
+      "d0_m": 300,
+      "walk_time_min": 4.2,
+      "tier": "Pocket / Street Park (< 0.50 ha)",
+      "standard": "WHO (2016) Doorstep"
+    },
+    {
+      "d0_m": 400,
+      "walk_time_min": 5.6,
+      "tier": "Pocket / Street Park (< 0.50 ha)",
+      "standard": "High-density urban"
+    },
+    {
+      "d0_m": 800,
+      "walk_time_min": 11.1,
+      "tier": "Neighborhood Park (0.50\u20131.50 ha)",
+      "standard": "Primary 10-min neighborhood"
+    },
+    {
+      "d0_m": 1500,
+      "walk_time_min": 20.8,
+      "tier": "District Community Park (1.50\u20135.00 ha)",
+      "standard": "District recreation benchmark"
+    },
+    {
+      "d0_m": 3000,
+      "walk_time_min": 41.7,
+      "tier": "Large Urban / Regional Park (>= 5.00 ha)",
+      "standard": "Extended sensitivity / Micro-mobility upper bound"
+    }
+  ],
+  "gaussian_2sfca_parameters": {
+    "decay_function": "Gaussian continuous friction decay",
+    "beta_impedance": 1500.0,
+    "step_1_park_supply": "Functional green footprint area (m2)",
+    "step_2_demand_weight": "Dasymetric building population (RASTERVALU)"
+  },
+  "optimization_models": {
+    "LSCP_minimize_facilities": {
+      "target_parcels": "56 Large candidate parcels (>= 1.50 ha)",
+      "fixed_facilities": "156 existing parks (locked as active)",
+      "mathematical_formulation": "Mixed-Integer Linear Programming (MILP)",
+      "solver_library": "scipy.optimize.milp (HiGHS branch-and-cut)",
+      "decision_variables": "Binary x_j in {0, 1}",
+      "coverage_constraints": "sum_{j in N_i} x_j >= 1 for all reachable demand points i",
+      "results": {
+        "at_3000m": {
+          "selected_sites": 17,
+          "population_coverage_pct": 86.91
+        },
+        "at_1500m": {
+          "selected_sites": 41,
+          "population_coverage_pct": 66.27
+        }
+      }
+    },
+    "P_Median_minimize_impedance": {
+      "target_parcels": "198 Small candidate parcels (< 1.50 ha)",
+      "cutoff_distance_d0": 1500,
+      "mathematical_formulation": "Min sum_i sum_j P_i * d_{ij} * y_{ij} subject to sum_j x_j = p",
+      "sensitivity_sweep_range": "p = 5 to 50 facilities (step = 5)",
+      "knee_point_inflection": {
+        "p_selected": 30,
+        "population_coverage_pct": 71.11,
+        "total_population_served": 259889
+      }
+    },
+    "combined_portfolio": {
+      "portfolio_composition": "30 small P-Median sites + 41 large LSCP sites",
+      "final_coverage_1500m_pct": 77.78,
+      "mean_per_capita_supply_m2_person": 8.26,
+      "gini_coefficient_reduction": "0.9218 -> 0.7780 (-15.6%)",
+      "theil_inequality_reduction": "2.6829 -> 1.4913 (-44.4%)"
+    }
+  }
+}
